@@ -1,4 +1,7 @@
-﻿namespace com.bodurov.NdSpace.Model
+﻿using System;
+using System.Collections.Generic;
+
+namespace com.bodurov.NdSpace.Model
 {
     public class SpacePoint<T> : BaseSpaceObject
     {

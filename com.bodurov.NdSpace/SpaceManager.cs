@@ -17,8 +17,18 @@ namespace com.bodurov.NdSpace
             _config = config;
         }
 
-        
-
+        SpacePoint<T> FindNearest<T>(SpacePoint<T> center, double within)
+        {
+            throw new NotImplementedException();
+        }
+        IEnumerable<SpacePoint<T>> FindWhere<T>(SpacePoint<T> center, double within)
+        {
+            throw new NotImplementedException();
+        }
+        SpacePoint<T> FirstOrDefault<T>(SpacePoint<T> center, double within)
+        {
+            throw new NotImplementedException();
+        }
 
         Space<T> ISpaceManager.CreateSpace<T>(ISpaceConfig config)
         {

@@ -22,23 +22,23 @@ namespace com.bodurov.NdSpace.Model
         public double Epsillon { get; internal set; }
 
 
-        public bool Within(double c, double min, double max)
-        {
-            return (c >= (min - Epsillon) && c <= (max + Epsillon));
-        }
+//        public bool Within(double c, double min, double max)
+//        {
+//            return (c >= (min - Epsillon) && c <= (max + Epsillon));
+//        }
         public bool Eq(double a, double b)
         {
             return Math.Abs(a - b) <= Epsillon;
         }
-        public bool LowOrEq(double a, double b)
-        {
-            if (Math.Abs(a - b) <= Epsillon) return true;
-            return a < b;
-        }
-        public bool HighOrEq(double a, double b)
-        {
-            if (Math.Abs(a - b) <= Epsillon) return true;
-            return a > b;
-        }
+//        public bool LowOrEq(double a, double b)
+//        {
+//            if (Math.Abs(a - b) <= Epsillon) return true;
+//            return a < b;
+//        }
+//        public bool HighOrEq(double a, double b)
+//        {
+//            if (Math.Abs(a - b) <= Epsillon) return true;
+//            return a > b;
+//        }
     }
 }
