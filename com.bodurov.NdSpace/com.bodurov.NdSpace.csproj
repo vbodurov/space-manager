@@ -53,7 +53,7 @@
     <Compile Include="Model\SpacePoint.cs" />
     <Compile Include="Model\SpacePointSource.cs" />
     <Compile Include="MustBe.cs" />
-    <Compile Include="SpaceConfig.cs" />
+    <Compile Include="Space3DConfig.cs" />
     <Compile Include="SpaceFactory.cs" />
     <Compile Include="SpaceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -8,7 +8,7 @@ namespace com.bodurov.NdSpace
         public static readonly ISpaceFactory Current = new SpaceFactory();
         private SpaceFactory()
         {
-            _config = new SpaceConfig();
+            _config = new Space3DConfig();
             _spaceManager = new SpaceManager(_config);
         }
         private readonly ISpaceConfig _config;

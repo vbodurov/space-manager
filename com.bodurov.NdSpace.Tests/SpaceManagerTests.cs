@@ -12,7 +12,7 @@ namespace YouVisio.Unity3D.AI.Tests
         [Test]
         public void CanFindSpacePointByCoordinates()
         {
-            ISpaceManager sm = new SpaceManager(new SpaceConfig());
+            ISpaceManager sm = new SpaceManager(new Space3DConfig());
             var space = sm.CreateSpace<string>();
 
             sm.AddPoint(space, "A", 0, 0, 0);
@@ -31,7 +31,7 @@ namespace YouVisio.Unity3D.AI.Tests
         [Test]
         public void CanFindNearestSpacePointCase1()
         {
-            ISpaceManager sm = new SpaceManager(new SpaceConfig());
+            ISpaceManager sm = new SpaceManager(new Space3DConfig());
             var space = sm.CreateSpace<string>();
 
             PopulatePoints(sm, space);
@@ -47,7 +47,7 @@ namespace YouVisio.Unity3D.AI.Tests
         [Test]
         public void CanFindNearestSpacePointCase2()
         {
-            ISpaceManager sm = new SpaceManager(new SpaceConfig());
+            ISpaceManager sm = new SpaceManager(new Space3DConfig());
             var space = sm.CreateSpace<string>();
 
             PopulatePoints(sm, space);
