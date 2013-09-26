@@ -10,5 +10,9 @@ namespace com.bodurov.NdSpace.Extensions
         {
             return Math.Abs(a - b) < epsillon;
         }
+        public static float Abs(this float n)
+        {
+            return n < 0 ? n*-1 : n;
+        }
     }
 }

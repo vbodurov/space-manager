@@ -29,6 +29,7 @@ namespace com.bodurov.NdSpace.Model
             }
             internal set { _point = value; }
         }
+        public float Position { get { return _point == null ? Single.NaN : _point.Position; } }
         public byte Level { get; private set; }
 
 
@@ -139,7 +140,7 @@ namespace com.bodurov.NdSpace.Model
 
         public override string ToString()
         {
-            return Point != null ? "DimensionLink("+Point.Position+")" : base.ToString();
+            return Point != null ? "DimensionLink("+Position+")" : base.ToString();
         }
         
     }

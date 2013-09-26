@@ -141,7 +141,7 @@ namespace com.bodurov.NdSpace.Visualizations
             {
                 DimensionPoint<int> left;
                 DimensionPoint<int> right;
-                var found = _manager.TryFindPoint(_space.Dimensions[0], (float)_mouseDownX, out left, out right);
+                var found = _manager.TryFindDimensionPoint(_space.Dimensions[0], (float)_mouseDownX, out left, out right);
 
                 _chosenEllipses.Clear();
                 foreach (FrameworkElement child in TheCanvas.Children)

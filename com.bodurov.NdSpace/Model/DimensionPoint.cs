@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace com.bodurov.NdSpace.Model
 {
@@ -47,6 +48,10 @@ namespace com.bodurov.NdSpace.Model
                     yield return e.Current;
                 }
             }
+        }
+        public SpacePoint<T> FirstPoint
+        {
+            get { return _points.FirstOrDefault(); }
         }
 
         public int NumberPoints

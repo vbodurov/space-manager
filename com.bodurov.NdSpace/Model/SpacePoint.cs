@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace com.bodurov.NdSpace.Model
 {
@@ -15,5 +14,34 @@ namespace com.bodurov.NdSpace.Model
         public Space<T> Space { get; private set; }
         public DimensionPoint<T>[] Dimensions { get; private set; }
         public T Value { get; set; }
+
+        public float DistanceTo(SpacePoint<T> otherPoint)
+        {
+            var sum = 0f;
+            for (var d = 0; d < Dimensions.Length; ++d)
+            {
+                var valOther = otherPoint.Dimensions[d].Position;
+                var valCurrD = Dimensions[d].Position;
+
+                var n = valCurrD - valOther;
+                n = n*n;
+                sum += n;
+            }
+            return (float)Math.Sqrt(sum);
+        }
+
+        public bool IsLocatedAt(params float[] dimensionPositions)
+        {
+            if (Dimensions.Length != dimensionPositions.Length)
+                throw new ArgumentException("Space dimension number of (" + Dimensions.Length + ") does not much passed coordinates number of (" + dimensionPositions.Length+")");
+
+            for (var d = 0; d < Dimensions.Length; ++d)
+            {
+                var dp = Dimensions[d];
+                if (!dp.Dimension.Eq(dp.Position, dimensionPositions[d]))
+                    return false;
+            }
+            return true;
+        }
     }
 }
