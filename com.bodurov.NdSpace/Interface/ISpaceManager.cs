@@ -6,7 +6,7 @@ namespace com.bodurov.NdSpace.Interface
 {
     public interface ISpaceManager
     {
-        Space<T> CreateSpace<T>(ISpaceConfig config = null);
+        Space<T> CreateSpace<T>(ISpaceConfig config);
         SpacePoint<T> AddPoint<T>(Space<T> space, T data, params float[] dimensionPositions);
         bool AddPoint<T>(Dimension<T> dimension, SpacePoint<T> data, float position);
         bool Reposition<T>(Dimension<T> dimension, SpacePoint<T> point, float position);

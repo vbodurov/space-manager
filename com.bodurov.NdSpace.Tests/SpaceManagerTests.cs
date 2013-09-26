@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Diagnostics;
+using NUnit.Framework;
 using com.bodurov.NdSpace;
 using com.bodurov.NdSpace.Interface;
 using com.bodurov.NdSpace.Model;
@@ -12,8 +14,8 @@ namespace YouVisio.Unity3D.AI.Tests
         [Test]
         public void CanFindSpacePointByCoordinates()
         {
-            ISpaceManager sm = new SpaceManager(new Space3DConfig());
-            var space = sm.CreateSpace<string>();
+            ISpaceManager sm = new SpaceManager();
+            var space = sm.CreateSpace<string>(new Space3DConfig());
 
             sm.AddPoint(space, "A", 0, 0, 0);
             sm.AddPoint(space, "B", 1, 5, -3);
@@ -21,7 +23,10 @@ namespace YouVisio.Unity3D.AI.Tests
             sm.AddPoint(space, "D", 0, 8, 8);
 
             SpacePoint<string> point;
+            var sw = Stopwatch.StartNew();
             var r = sm.TryFindFirstSpacePoint(space, out point, 2, -6, 1);
+            sw.Stop();
+            Console.WriteLine("time: "+sw.ElapsedMilliseconds);
 
             Assert.That(r, Is.True);
             Assert.That(point, Is.Not.Null);
@@ -31,15 +36,19 @@ namespace YouVisio.Unity3D.AI.Tests
         [Test]
         public void CanFindNearestSpacePointCase1()
         {
-            ISpaceManager sm = new SpaceManager(new Space3DConfig());
-            var space = sm.CreateSpace<string>();
+            ISpaceManager sm = new SpaceManager();
+            var space = sm.CreateSpace<string>(new Space3DConfig());
 
             PopulatePoints(sm, space);
 
             SpacePoint<string> center;
             sm.TryFindFirstSpacePoint(space, out center, 0, 0, 0);
 
+            var sw = Stopwatch.StartNew();
             var point = sm.FindNearest(center, 10);
+            sw.Stop();
+            Console.WriteLine("time: " + sw.ElapsedMilliseconds);
+
             Assert.That(point, Is.Not.Null);
             Assert.That(point.Value, Is.EqualTo(p2));
         }
@@ -47,8 +56,8 @@ namespace YouVisio.Unity3D.AI.Tests
         [Test]
         public void CanFindNearestSpacePointCase2()
         {
-            ISpaceManager sm = new SpaceManager(new Space3DConfig());
-            var space = sm.CreateSpace<string>();
+            ISpaceManager sm = new SpaceManager();
+            var space = sm.CreateSpace<string>(new Space3DConfig());
 
             PopulatePoints(sm, space);
 

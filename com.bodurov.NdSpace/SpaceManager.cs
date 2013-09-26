@@ -10,13 +10,11 @@ namespace com.bodurov.NdSpace
     public class SpaceManager : ISpaceManager
     {
         private readonly ISpaceManager _spaceManager;
-        private readonly ISpaceConfig _config;
 
 
-        internal SpaceManager(ISpaceConfig config)
+        internal SpaceManager()
         {
             _spaceManager = this;
-            _config = config;
         }
 
         SpacePoint<T> ISpaceManager.FindNearest<T>(SpacePoint<T> center, float within)
@@ -177,7 +175,7 @@ namespace com.bodurov.NdSpace
 
         Space<T> ISpaceManager.CreateSpace<T>(ISpaceConfig config)
         {
-            var space = new Space<T>(config ?? _config);
+            var space = new Space<T>(config, this);
 
             for (byte i = 0; i < space.Dimensions.Length; ++i)
             {

@@ -9,7 +9,7 @@ namespace com.bodurov.NdSpace
         private SpaceFactory()
         {
             _config = new Space3DConfig();
-            _spaceManager = new SpaceManager(_config);
+            _spaceManager = new SpaceManager();
         }
         private readonly ISpaceConfig _config;
         ISpaceConfig ISpaceFactory.SpaceConfig { get { return _config; } }
