@@ -675,11 +675,12 @@ namespace com.bodurov.NdSpace
             point = set.FirstOrDefault();
             return point != null;
         }
+        
 
         bool ISpaceManager.TryFindSpacePoints<T>(Space<T> space, out HashSet<SpacePoint<T>> points, params float[] dimensionPositions)
         {
-            if (space.Dimensions.Length != dimensionPositions.Length)
-                throw new ArgumentException("Space dimension number of "+space.Dimensions.Length +" does not much passed coordinates number of " + dimensionPositions.Length);
+            MustBe.Equal(space.Dimensions.Length, dimensionPositions.Length, () => "space.Dimensions.Length AND dimensionPositions.Length");
+
             points = new HashSet<SpacePoint<T>>();
             for (var d = 0; d < space.Dimensions.Length; ++d)
             {
@@ -775,7 +776,16 @@ namespace com.bodurov.NdSpace
             return false;
         }
 
-
+        bool ISpaceManager.Reposition<T>(SpacePoint<T> sp, params float[] dimensionPositions)
+        {
+            MustBe.Equal(sp.Dimensions.Length, dimensionPositions.Length, () => "space.Dimensions.Length AND dimensionPositions.Length");
+            byte r = 0;
+            for (var d = 0; d < sp.Dimensions.Length; ++d)
+            {
+                if (_spaceManager.Reposition(sp.Dimensions[d].Dimension, sp, dimensionPositions[d])) ++r;
+            }
+            return r > 0;
+        }
         bool ISpaceManager.Reposition<T>(Dimension<T> dimension, SpacePoint<T> sp, float position)
         {
             var point = sp.Dimensions[dimension.Index];

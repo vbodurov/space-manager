@@ -38,5 +38,6 @@ namespace com.bodurov.NdSpace.Interface
 
         IEnumerable<PointAndDistance<T>> FindAllNearWhereWithDistance<T>(SpacePoint<T> center, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where, float within);
         IEnumerable<PointAndDistance<T>> FindAllNearWithDistance<T>(SpacePoint<T> center, float within);
+        bool Reposition<T>(SpacePoint<T> sp, params float[] dimensionPositions);
     }
 }
