@@ -13,8 +13,8 @@ namespace com.bodurov.NdSpace.Model
             Epsillon = space.Config.DefaultEpsilon;
         }
 
-        public DimensionPoint<T> Head { get; internal set; }
-        public DimensionPoint<T> Tail { get; internal set; }
+        public DimensionPoint<T> HeadDimPoint { get; internal set; }
+        public DimensionPoint<T> TailDimPoint { get; internal set; }
         public Space<T> Space { get; private set; }
         public byte Index { get; private set; }
         public byte NumberLevels { get { return (byte)(Count < 2 ? Count : Math.Ceiling(Math.Log(Count, 2))); } }

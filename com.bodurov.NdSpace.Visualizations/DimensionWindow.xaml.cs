@@ -216,8 +216,8 @@ namespace com.bodurov.NdSpace.Visualizations
         private void OnTestButtonClick(object sender, RoutedEventArgs e)
         {
             var dimension = _space.Dimensions[0];
-            var head = dimension.Head;
-            var tail = dimension.Tail;
+            var head = dimension.HeadDimPoint;
+            var tail = dimension.TailDimPoint;
         }
     }
 }

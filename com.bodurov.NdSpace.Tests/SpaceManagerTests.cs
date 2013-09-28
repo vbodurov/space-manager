@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using com.bodurov.NdSpace;
 using com.bodurov.NdSpace.Interface;
 using com.bodurov.NdSpace.Model;
@@ -23,10 +21,7 @@ namespace YouVisio.Unity3D.AI.Tests
             sm.AddPoint(space, "D", 0, 8, 8);
 
             SpacePoint<string> point;
-            var sw = Stopwatch.StartNew();
             var r = sm.TryFindFirstSpacePoint(space, out point, 2, -6, 1);
-            sw.Stop();
-            Console.WriteLine("time: "+sw.ElapsedMilliseconds);
 
             Assert.That(r, Is.True);
             Assert.That(point, Is.Not.Null);
@@ -39,18 +34,15 @@ namespace YouVisio.Unity3D.AI.Tests
             ISpaceManager sm = new SpaceManager();
             var space = sm.CreateSpace<string>(new Space3DConfig());
 
-            PopulatePoints(sm, space);
+            Helper.PopulatePoints(sm, space);
 
             SpacePoint<string> center;
             sm.TryFindFirstSpacePoint(space, out center, 0, 0, 0);
 
-            var sw = Stopwatch.StartNew();
             var point = sm.FindNearest(center, 10);
-            sw.Stop();
-            Console.WriteLine("time: " + sw.ElapsedMilliseconds);
 
             Assert.That(point, Is.Not.Null);
-            Assert.That(point.Value, Is.EqualTo(p2));
+            Assert.That(point.Value, Is.EqualTo(Helper.p2));
         }
 
         [Test]
@@ -59,28 +51,38 @@ namespace YouVisio.Unity3D.AI.Tests
             ISpaceManager sm = new SpaceManager();
             var space = sm.CreateSpace<string>(new Space3DConfig());
 
-            PopulatePoints(sm, space);
+            Helper.PopulatePoints(sm, space);
 
             SpacePoint<string> center;
             sm.TryFindFirstSpacePoint(space, out center, 1, -1, -1);
 
             var point = sm.FindNearest(center, 10);
             Assert.That(point, Is.Not.Null);
-            Assert.That(point.Value, Is.EqualTo(p0));
+            Assert.That(point.Value, Is.EqualTo(Helper.p0));
         }
 
-        private const string p0 = "p0 (0, 0, 0)";
-        private const string p1 = "p1 (1, 8, 3)";
-        private const string p2 = "p2 (1,-1,-1)";
-        private const string p3 = "p3 (5, 5, 5)";
-        private const string p4 = "p4 (7, 1, 1)";
-        private static void PopulatePoints(ISpaceManager sm, Space<string> space)
+        [Test]
+        public void CanRepositionPoint()
         {
-            sm.AddPoint(space, p0, 0, 0, 0);
-            sm.AddPoint(space, p1, 1, 8, 3);
-            sm.AddPoint(space, p3, 5, 5, 5);
-            sm.AddPoint(space, p2, 1, -1, -1);
-            sm.AddPoint(space, p4, 7, 1, 1);
+            ISpaceManager sm = new SpaceManager();
+            var space = sm.CreateSpace<string>(new Space3DConfig());
+
+            Helper.PopulatePoints(sm, space);
+
+            SpacePoint<string> point;
+            sm.TryFindFirstSpacePoint(space, out point, 0, 0, 0);
+
+            var r = sm.Reposition(point, 9.5f, -9.5f, 9.5f);
+
+            Assert.That(r, Is.True,"Expeted to return true from Reposition method");
+            Assert.That(point.Dimensions[0], Is.Not.Null, "Dim 0 should not be null");
+            Assert.That(point.Dimensions[1], Is.Not.Null, "Dim 1 should not be null");
+            Assert.That(point.Dimensions[2], Is.Not.Null, "Dim 2 should not be null");
+            Assert.That(point.Dimensions[0].Position, Is.EqualTo(9.5));
+            Assert.That(point.Dimensions[1].Position, Is.EqualTo(-9.5));
+            Assert.That(point.Dimensions[2].Position, Is.EqualTo(9.5));
         }
+
+        
     }
 }

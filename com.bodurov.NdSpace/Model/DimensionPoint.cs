@@ -15,17 +15,17 @@ namespace com.bodurov.NdSpace.Model
         }
 
         public float Position { get; internal set; }
-        private DimensionLink<T> _head;
-        public DimensionLink<T>  Head
+        private DimensionLink<T> _headLink;
+        public DimensionLink<T>  HeadLink
         {
-            get { return _head; }
+            get { return _headLink; }
             internal set
             {
-                value.Point = this;
-                _head = value;
+                value.DimPoint = this;
+                _headLink = value;
             }
         }
-        public DimensionLink<T> Tail { get; internal set; }
+        public DimensionLink<T> TailLink { get; internal set; }
         
         public Dimension<T> Dimension { get; private set; }
 
@@ -38,7 +38,7 @@ namespace com.bodurov.NdSpace.Model
         {
             return _points.Remove(sp);
         }
-        public IEnumerable<SpacePoint<T>> Points
+        public IEnumerable<SpacePoint<T>> SpaPoints
         {
             get
             {

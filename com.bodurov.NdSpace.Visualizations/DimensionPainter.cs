@@ -46,12 +46,12 @@ namespace com.bodurov.NdSpace.Visualizations
             ClearCanvas();
 
 
-            if (dimension.Head == null) return;
+            if (dimension.HeadDimPoint == null) return;
 
-            DrawHeadPointer(dimension.Head.Position, ypad * 3, 7);
-            DrawTailPointer(dimension.Tail.Position, ypad * 3, 7);
+            DrawHeadPointer(dimension.HeadDimPoint.Position, ypad * 3, 7);
+            DrawTailPointer(dimension.TailDimPoint.Position, ypad * 3, 7);
 
-            var dpl0 = dimension.Head.Head;
+            var dpl0 = dimension.HeadDimPoint.HeadLink;
             while (dpl0 != null)
             {
 
@@ -108,18 +108,18 @@ namespace com.bodurov.NdSpace.Visualizations
             const double yLevel0 = ypad * 2 + ypad * 2;
             const int linePad = 10;
 
-            var x = (double)dpl0.Point.Position;
+            var x = (double)dpl0.DimPoint.Position;
             _canvas.Children.Add(new Line { X1 = x, Y1 = ySpacePoints + linePad, X2 = x, Y2 = ySpacePoints + ypad - linePad, Stroke = new SolidColorBrush(Colors.DarkBlue) });
             _canvas.Children.Add(new Line { X1 = x, Y1 = ySpacePoints + ypad + linePad, X2 = x, Y2 = yLevel0 - linePad, Stroke = new SolidColorBrush(Colors.DarkBlue) });
 
             DrawHeadPointer(x, yLevel0, linePad / 2);
-            DrawTailPointer(x, yLevel0 + dpl0.Point.Tail.Level * ypad, linePad / 2);
+            DrawTailPointer(x, yLevel0 + dpl0.DimPoint.TailLink.Level * ypad, linePad / 2);
 
             DrawLink(dpl0);
 
             if (dpl0.Next != null)
             {
-                var nextX = dpl0.Next.Point.Position;
+                var nextX = dpl0.Next.DimPoint.Position;
                 _canvas.Children.Add(new Line { X1 = x + linePad, Y1 = yLevel0, X2 = nextX - linePad, Y2 = yLevel0, Stroke = new SolidColorBrush(Colors.DarkGreen) });
             }
 
@@ -135,7 +135,7 @@ namespace com.bodurov.NdSpace.Visualizations
 
                 if (upper.Next != null)
                 {
-                    var nextX = upper.Next.Point.Position;
+                    var nextX = upper.Next.DimPoint.Position;
                     _canvas.Children.Add(new Line { X1 = x + linePad, Y1 = yLevel, X2 = nextX - linePad, Y2 = yLevel, Stroke = new SolidColorBrush(Colors.DarkGreen) });
                 }
 
@@ -145,7 +145,7 @@ namespace com.bodurov.NdSpace.Visualizations
 
         private void DrawLink(DimensionLink<int> link)
         {
-            var x = (double)link.Point.Position;
+            var x = (double)link.DimPoint.Position;
             var y = link.Level * ypad + ypad * 4;
             const int containerPad = 7;
             var p = new Polygon
@@ -164,7 +164,7 @@ namespace com.bodurov.NdSpace.Visualizations
             {
                 var el = new Ellipse
                 {
-                    Tag = link.Point,
+                    Tag = link.DimPoint,
                     Width = containerPad * 2,
                     Height = containerPad * 2,
                     Fill = Brushes.Moccasin,
@@ -175,7 +175,7 @@ namespace com.bodurov.NdSpace.Visualizations
                 _canvas.Children.Add(el);
                 y = ypad * 2;
 
-                foreach (var sp in link.Point.Points)
+                foreach (var sp in link.DimPoint.SpaPoints)
                 {
                     _canvas.Children.Add(new Rectangle
                         {

@@ -16,14 +16,14 @@ namespace com.bodurov.NdSpace.Model
         public DimensionLink<T> Next { get; internal set; }
         public DimensionLink<T> Upper { get; internal set; }
         public DimensionLink<T> Lower { get; internal set; }
-        public DimensionPoint<T> Point
+        public DimensionPoint<T> DimPoint
         {
             get
             {
                 if (Level > 0)
                 {
                     if (Lower == null) throw new InvalidOperationException("Missing lower link");
-                    return Lower.Point;
+                    return Lower.DimPoint;
                 }
                 return  _point;
             }
@@ -51,6 +51,16 @@ namespace com.bodurov.NdSpace.Model
             Prev = prev;
             return this;
         }
+        public DimensionLink<T> MoveNext(int number)
+        {
+            var curr = this;
+            for (var i = 0; i < number; ++i)
+            {
+                if (curr.Next == null) return curr;
+                curr = curr.Next;
+            }
+            return curr;
+        } 
 
         public DimensionLink<T> NextUntil(Func<DimensionLink<T>,int,bool> condition)
         {
@@ -140,7 +150,7 @@ namespace com.bodurov.NdSpace.Model
 
         public override string ToString()
         {
-            return Point != null ? "DimensionLink("+Position+")" : base.ToString();
+            return DimPoint != null ? "DimensionLink("+Position+")" : base.ToString();
         }
         
     }

@@ -38,10 +38,10 @@ namespace com.bodurov.NdSpace
         {
             const int dimension = 0;
             var centerDimPoint = center.Dimensions[dimension];
-            var centerLink = centerDimPoint.Head;
+            var centerLink = centerDimPoint.HeadLink;
             if (centerDimPoint.NumberPoints > 1)
             {
-                foreach (var sp in centerDimPoint.Points.Where(p => p.ID != center.ID))
+                foreach (var sp in centerDimPoint.SpaPoints.Where(p => p.ID != center.ID))
                 {
                     var dictance = sp.DistanceTo(center);
                     if (dictance <= within)
@@ -54,7 +54,7 @@ namespace com.bodurov.NdSpace
             var next = centerLink.Next;
             while (next != null && (next.Position - centerPos).Abs() <= within)
             {
-                foreach(var nextSpaPoint in next.Point.Points)
+                foreach(var nextSpaPoint in next.DimPoint.SpaPoints)
                 {
                     var dictance = nextSpaPoint.DistanceTo(center);
                     if (dictance <= within)
@@ -67,7 +67,7 @@ namespace com.bodurov.NdSpace
             var prev = centerLink.Prev;
             while (prev != null && (prev.Position - centerPos).Abs() <= within)
             {
-                foreach(var prevSpaPoint in prev.Point.Points)
+                foreach(var prevSpaPoint in prev.DimPoint.SpaPoints)
                 {
                     var dictance = prevSpaPoint.DistanceTo(center);
                     if (dictance <= within)
@@ -83,10 +83,10 @@ namespace com.bodurov.NdSpace
         {
             const int dimension = 0;
             var centerDimPoint = center.Dimensions[dimension];
-            var centerLink = centerDimPoint.Head;
+            var centerLink = centerDimPoint.HeadLink;
             if (centerDimPoint.NumberPoints > 1)
             {
-                foreach (var sp in centerDimPoint.Points.Where(p => p.ID != center.ID))
+                foreach (var sp in centerDimPoint.SpaPoints.Where(p => p.ID != center.ID))
                 {
                     var dictance = sp.DistanceTo(center);
                     if (dictance <= within && where(sp, center, dictance))
@@ -99,7 +99,7 @@ namespace com.bodurov.NdSpace
             var next = centerLink.Next;
             while (next != null && (next.Position - centerPos).Abs() <= within)
             {
-                foreach (var nextSpaPoint in next.Point.Points)
+                foreach (var nextSpaPoint in next.DimPoint.SpaPoints)
                 {
                     var dictance = nextSpaPoint.DistanceTo(center);
                     if (dictance <= within && where(nextSpaPoint, center, dictance))
@@ -112,7 +112,7 @@ namespace com.bodurov.NdSpace
             var prev = centerLink.Prev;
             while (prev != null && (prev.Position - centerPos).Abs() <= within)
             {
-                foreach (var prevSpaPoint in prev.Point.Points)
+                foreach (var prevSpaPoint in prev.DimPoint.SpaPoints)
                 {
                     var dictance = prevSpaPoint.DistanceTo(center);
                     if (dictance <= within && where(prevSpaPoint, center, dictance))
@@ -131,10 +131,10 @@ namespace com.bodurov.NdSpace
         {
             const int dimension = 0;
             var centerDimPoint = center.Dimensions[dimension];
-            var centerLink = centerDimPoint.Head;
+            var centerLink = centerDimPoint.HeadLink;
             if (centerDimPoint.NumberPoints > 1)
             {
-                foreach (var sp in centerDimPoint.Points.Where(p => p.ID != center.ID))
+                foreach (var sp in centerDimPoint.SpaPoints.Where(p => p.ID != center.ID))
                 {
                     var dictance = sp.DistanceTo(center);
                     if (dictance <= within && where(sp, center, dictance))
@@ -147,7 +147,7 @@ namespace com.bodurov.NdSpace
             var next = centerLink.Next;
             while (next != null && (next.Position - centerPos).Abs() <= within)
             {
-                foreach (var nextSpaPoint in next.Point.Points)
+                foreach (var nextSpaPoint in next.DimPoint.SpaPoints)
                 {
                     var dictance = nextSpaPoint.DistanceTo(center);
                     if (dictance <= within && where(nextSpaPoint, center, dictance))
@@ -160,7 +160,7 @@ namespace com.bodurov.NdSpace
             var prev = centerLink.Prev;
             while (prev != null && (prev.Position - centerPos).Abs() <= within)
             {
-                foreach (var prevSpaPoint in prev.Point.Points)
+                foreach (var prevSpaPoint in prev.DimPoint.SpaPoints)
                 {
                     var dictance = prevSpaPoint.DistanceTo(center);
                     if (dictance <= within && where(prevSpaPoint, center, dictance))
@@ -185,35 +185,43 @@ namespace com.bodurov.NdSpace
             return space;
         }
 
-        bool ISpaceManager.RemovePoint<T>(SpacePoint<T> sp)
+        private static bool RemovePointFromDimensions<T>(SpacePoint<T> sp, int index)
         {
             var isRemoved = false;
-            for (var i = 0; i < sp.Dimensions.Length; ++i)
+            var dPoint = sp.Dimensions[index];
+            if (dPoint == null)
             {
-                var dPoint = sp.Dimensions[i];
-                if (dPoint == null)
+                return false;
+            }
+            if (dPoint.NumberPoints > 1)
+            {
+                if (dPoint.RemovePoint(sp))
                 {
-                    continue;
+                    isRemoved = true;
                 }
-                if (dPoint.NumberPoints > 1)
+            }
+            else
+            {
+                if (dPoint.RemovePoint(sp))
                 {
-                    if (dPoint.RemovePoint(sp))
+                    if (RemoveDimensionPoint(dPoint))
                     {
                         isRemoved = true;
                     }
                 }
-                else
-                {
-                    if (dPoint.RemovePoint(sp))
-                    {
-                        if (RemoveDimensionPoint(dPoint))
-                        {
-                            isRemoved = true;
-                        }
-                    }  
-                }
+            }
 
-                sp.Dimensions[i] = null;
+            sp.Dimensions[index] = null;
+
+            return isRemoved;
+        }
+
+        bool ISpaceManager.RemovePoint<T>(SpacePoint<T> sp)
+        {
+            var isRemoved = true;
+            for (var i = 0; i < sp.Dimensions.Length; ++i)
+            {
+                if (!RemovePointFromDimensions(sp, i)) isRemoved = false;
             }
             return isRemoved;
         }
@@ -221,25 +229,25 @@ namespace com.bodurov.NdSpace
         private static bool RemoveDimensionPoint<T>(DimensionPoint<T> dPoint)
         {
             var dimension = dPoint.Dimension;
-            if (dimension == null || dimension.Head == null)
+            if (dimension == null || dimension.HeadDimPoint == null)
             {
                 throw new InvalidOperationException("Invalid tree: point was requested to be removed but the tree is already empty");
             }
             if (dimension.Count == 1)
             {
-                if (dimension.Head == dPoint)
+                if (dimension.HeadDimPoint == dPoint)
                 {
                     dimension.Count = 0;
-                    dimension.Head = dimension.Tail = null;
+                    dimension.HeadDimPoint = dimension.TailDimPoint = null;
                     return true;
                 }
                 throw new InvalidOperationException("Invalid tree: point requested to be removed does not seem to belong to the tree");
             }
-            if (dimension.Head == dPoint)
+            if (dimension.HeadDimPoint == dPoint)
             {
                 RemoveHead(dPoint.Dimension);
             }
-            else if (dimension.Tail == dPoint)
+            else if (dimension.TailDimPoint == dPoint)
             {
                 RemoveTail(dPoint.Dimension);
             }
@@ -252,17 +260,17 @@ namespace com.bodurov.NdSpace
         }
         private static void RemoveHead<T>(Dimension<T> dimension)
         {
-            var oldHead = dimension.Head;
-            var oldHeadLevel0 = oldHead.Head;
-            var newHead = oldHeadLevel0.Next.Point;
-            ProcessTwoColumns(oldHead.Head, newHead.Head, (a, b) => a.AssignNext(b.Next));
+            var oldHead = dimension.HeadDimPoint;
+            var oldHeadLevel0 = oldHead.HeadLink;
+            var newHead = oldHeadLevel0.Next.DimPoint;
+            ProcessTwoColumns(oldHead.HeadLink, newHead.HeadLink, (a, b) => a.AssignNext(b.Next));
 
 
-            newHead.Head = oldHead.Head;
-            newHead.Tail = oldHead.Tail;
-            dimension.Head = newHead;
+            newHead.HeadLink = oldHead.HeadLink;
+            newHead.TailLink = oldHead.TailLink;
+            dimension.HeadDimPoint = newHead;
 
-            if (dimension.Head.Head.Next != null) RemoveOrMoveColumn(dimension.Head.Head.Next.Point);
+            if (dimension.HeadDimPoint.HeadLink.Next != null) RemoveOrMoveColumn(dimension.HeadDimPoint.HeadLink.Next.DimPoint);
             TryRemoveLevelInternal(dimension);
         }
 
@@ -270,22 +278,22 @@ namespace com.bodurov.NdSpace
 
         private static void RemoveTail<T>(Dimension<T> dimension)
         {
-            var oldTail = dimension.Tail;
-            var oldTailLevel0 = oldTail.Head;
-            var newTail = oldTailLevel0.Prev.Point;
+            var oldTail = dimension.TailDimPoint;
+            var oldTailLevel0 = oldTail.HeadLink;
+            var newTail = oldTailLevel0.Prev.DimPoint;
 
-            ProcessTwoColumns(newTail.Head, oldTail.Head, (a, b) => b.AssignPrev(a.Prev));
+            ProcessTwoColumns(newTail.HeadLink, oldTail.HeadLink, (a, b) => b.AssignPrev(a.Prev));
 
-            newTail.Head = oldTail.Head;
-            newTail.Tail = oldTail.Tail;
-            dimension.Tail = newTail;
+            newTail.HeadLink = oldTail.HeadLink;
+            newTail.TailLink = oldTail.TailLink;
+            dimension.TailDimPoint = newTail;
 
-            if (dimension.Tail.Head.Prev != null) RemoveOrMoveColumn(dimension.Tail.Head.Prev.Point);
+            if (dimension.TailDimPoint.HeadLink.Prev != null) RemoveOrMoveColumn(dimension.TailDimPoint.HeadLink.Prev.DimPoint);
             TryRemoveLevelInternal(dimension);
         }
         private static void RemoveMiddlePoint<T>(DimensionPoint<T> dPoint)
         {
-            var link = dPoint.Head;
+            var link = dPoint.HeadLink;
 
             RemoveOrMoveColumn(dPoint);
 
@@ -299,11 +307,11 @@ namespace com.bodurov.NdSpace
         
         private static bool RemoveOrMoveColumn<T>(DimensionPoint<T> dPoint)
         {
-            if (dPoint == null || dPoint.Head == null) return false;
+            if (dPoint == null || dPoint.HeadLink == null) return false;
             var dimension = dPoint.Dimension;
-            if (dimension.Head == dPoint || dimension.Tail == dPoint) return false;
-            var head = dPoint.Head;
-            var tail = dPoint.Tail;
+            if (dimension.HeadDimPoint == dPoint || dimension.TailDimPoint == dPoint) return false;
+            var head = dPoint.HeadLink;
+            var tail = dPoint.TailLink;
 
             
             // try move right to direct neighbour that has only 1 level
@@ -312,10 +320,10 @@ namespace com.bodurov.NdSpace
                 var destination = head.Next;
 
                 destination.AssignUpper(head.Upper);
-                destination.Point.Tail = tail;
+                destination.DimPoint.TailLink = tail;
 
                 head.AssignUpper(null);
-                head.Point.Tail = head.Point.Head;
+                head.DimPoint.TailLink = head.DimPoint.HeadLink;
             }
             // try move left to direct neighbour that has only 1 level
             else if (HasBottomLevelNeighbourToTheLeft(head))
@@ -323,32 +331,32 @@ namespace com.bodurov.NdSpace
                 var destination = head.Prev;
 
                 destination.AssignUpper(head.Upper);
-                destination.Point.Tail = tail;
+                destination.DimPoint.TailLink = tail;
 
                 head.AssignUpper(null);
-                head.Point.Tail = head.Point.Head;
+                head.DimPoint.TailLink = head.DimPoint.HeadLink;
             }
             // try move the tip right to current level neighbour
             else if (HasTopLevelNeighbourToTheRight(tail))
             {
-                var toDelete = tail.Lower.Point;
+                var toDelete = tail.Lower.DimPoint;
                 var target = tail.Next.Lower.Prev.Prev;
                 tail.Lower.AssignUpper(null);
                 target.AssignUpper(tail);
-                target.Point.Tail = tail;
+                target.DimPoint.TailLink = tail;
 
-                DeleteColumn(toDelete.Head);
+                DeleteColumn(toDelete.HeadLink);
             }
             // try move the tip left to current level neighbour
             else if (HasTopLevelNeighbourToTheLeft(tail))
             {
-                var toDelete = tail.Lower.Point;
+                var toDelete = tail.Lower.DimPoint;
                 var target = tail.Prev.Lower.Next.Next;
                 tail.Lower.AssignUpper(null);
                 target.AssignUpper(tail);
-                target.Point.Tail = tail;
+                target.DimPoint.TailLink = tail;
 
-                DeleteColumn(toDelete.Head);
+                DeleteColumn(toDelete.HeadLink);
             }
             // delete the column
             else
@@ -369,7 +377,7 @@ namespace com.bodurov.NdSpace
                 ShrinkColumn(toSrink);
             }
             head.AssignUpper(null);
-            head.Point.Tail = head.Point.Head;
+            head.DimPoint.TailLink = head.DimPoint.HeadLink;
         }
 
 
@@ -457,12 +465,12 @@ namespace com.bodurov.NdSpace
 
             MustBe.Null(sp.Dimensions[dimension.Index], () => "space point already has assigned the dimension with index="+dimension.Index);
 
-            if (dimension.Head == null)
+            if (dimension.HeadDimPoint == null)
             {
                 var dp = new DimensionPoint<T>(dimension) { Position = position };
-                dp.Head = dp.Tail = new DimensionLink<T>(0, dp);
+                dp.HeadLink = dp.TailLink = new DimensionLink<T>(0, dp);
                 dp.AddPoint(sp);
-                dimension.Head = dimension.Tail = dp;
+                dimension.HeadDimPoint = dimension.TailDimPoint = dp;
                 dimension.Count = 1;
                 return true;
             }
@@ -494,11 +502,11 @@ namespace com.bodurov.NdSpace
             var newPoint = new DimensionPoint<T>(dimension) { Position = position };
             newPoint.AddPoint(sp);
             var newLink = new DimensionLink<T>(0, newPoint);
-            newPoint.Head = newLink;
-            newPoint.Tail = newLink;
+            newPoint.HeadLink = newLink;
+            newPoint.TailLink = newLink;
 
-            left.Head.AssignNext(newLink);
-            newLink.AssignNext(right.Head);
+            left.HeadLink.AssignNext(newLink);
+            newLink.AssignNext(right.HeadLink);
 
             _spaceManager.TryAddLevel(dimension);
             var toExtendUp = newLink.GetSiblingExtensionCandidate();
@@ -514,22 +522,22 @@ namespace com.bodurov.NdSpace
         {
             var newTail = new DimensionPoint<T>(dimension) {Position = position};
             newTail.AddPoint(sp);
-            newTail.Head = new DimensionLink<T>(0, newTail);
+            newTail.HeadLink = new DimensionLink<T>(0, newTail);
 
-            var oldTail = dimension.Tail;
+            var oldTail = dimension.TailDimPoint;
 
-            dimension.Tail = newTail;
-            oldTail.Head.AssignNext(newTail.Head);
+            dimension.TailDimPoint = newTail;
+            oldTail.HeadLink.AssignNext(newTail.HeadLink);
 
-            var upper = oldTail.Head.Upper;
-            newTail.Head.AssignUpper(upper);
-            oldTail.Head.Upper = null;
-            newTail.Tail = oldTail.Tail.Level == 0 ? newTail.Head : oldTail.Tail;
-            oldTail.Tail = oldTail.Head;
+            var upper = oldTail.HeadLink.Upper;
+            newTail.HeadLink.AssignUpper(upper);
+            oldTail.HeadLink.Upper = null;
+            newTail.TailLink = oldTail.TailLink.Level == 0 ? newTail.HeadLink : oldTail.TailLink;
+            oldTail.TailLink = oldTail.HeadLink;
 
 
             _spaceManager.TryAddLevel(dimension);
-            var toExtendUp = dimension.Tail.Head.PrevUntil((n, i) => i == 1);
+            var toExtendUp = dimension.TailDimPoint.HeadLink.PrevUntil((n, i) => i == 1);
             while (_spaceManager.TryExtendUp(toExtendUp, out toExtendUp))
             {
                 _spaceManager.TryAddLevel(dimension);
@@ -540,21 +548,21 @@ namespace com.bodurov.NdSpace
         {
             var newHead = new DimensionPoint<T>(dimension) {Position = position};
             newHead.AddPoint(sp);
-            newHead.Head = new DimensionLink<T>(0, newHead);
+            newHead.HeadLink = new DimensionLink<T>(0, newHead);
 
-            var oldHead = dimension.Head;
+            var oldHead = dimension.HeadDimPoint;
 
-            dimension.Head = newHead;
-            newHead.Head.AssignNext(oldHead.Head);
+            dimension.HeadDimPoint = newHead;
+            newHead.HeadLink.AssignNext(oldHead.HeadLink);
 
-            var upper = oldHead.Head.Upper;
-            newHead.Head.AssignUpper(upper);
-            oldHead.Head.Upper = null;
-            newHead.Tail = oldHead.Tail.Level == 0 ? newHead.Head : oldHead.Tail;
-            oldHead.Tail = oldHead.Head;
+            var upper = oldHead.HeadLink.Upper;
+            newHead.HeadLink.AssignUpper(upper);
+            oldHead.HeadLink.Upper = null;
+            newHead.TailLink = oldHead.TailLink.Level == 0 ? newHead.HeadLink : oldHead.TailLink;
+            oldHead.TailLink = oldHead.HeadLink;
 
             _spaceManager.TryAddLevel(dimension);
-            var toExtendUp = dimension.Head.Head.NextUntil((n, i) => i == 1);
+            var toExtendUp = dimension.HeadDimPoint.HeadLink.NextUntil((n, i) => i == 1);
             while (_spaceManager.TryExtendUp(toExtendUp, out toExtendUp))
             {
                 _spaceManager.TryAddLevel(dimension);
@@ -563,23 +571,23 @@ namespace com.bodurov.NdSpace
 
         bool ISpaceManager.TryAddLevel<T>(Dimension<T> dimension)
         {
-            if (dimension.Head == null || dimension.Head.Tail == null) return false;
+            if (dimension.HeadDimPoint == null || dimension.HeadDimPoint.TailLink == null) return false;
 
-            var topLeft = dimension.Head.Tail;
+            var topLeft = dimension.HeadDimPoint.TailLink;
 
             if (topLeft.CountConnectionsRight() == 0) return false;
             
             var left = new DimensionLink<T>((byte)(topLeft.Level + 1));
             topLeft.AssignUpper(left);
 
-            var topRight = dimension.Tail.Tail;
+            var topRight = dimension.TailDimPoint.TailLink;
             var right = new DimensionLink<T>((byte)(topRight.Level + 1));
             topRight.AssignUpper(right);
 
             left.AssignNext(right);
 
-            dimension.Head.Tail = left;
-            dimension.Tail.Tail = right;
+            dimension.HeadDimPoint.TailLink = left;
+            dimension.TailDimPoint.TailLink = right;
 
             return true;
         }
@@ -591,13 +599,13 @@ namespace com.bodurov.NdSpace
 
         private static bool TryRemoveLevelInternal<T>(Dimension<T> dimension)
         {
-            if (dimension.Head == null) return false;
+            if (dimension.HeadDimPoint == null) return false;
 
             var status = false;
 
             while (true)
             {
-                var topLeft = dimension.Head.Tail;
+                var topLeft = dimension.HeadDimPoint.TailLink;
 
                 if (topLeft.Level == 0) break;
 
@@ -609,8 +617,8 @@ namespace com.bodurov.NdSpace
                 while (link != null)
                 {
                     link.AssignUpper(null);
-                    var point = link.Point;
-                    point.Tail = link;
+                    var point = link.DimPoint;
+                    point.TailLink = link;
 
                     link = link.Next;
                 }
@@ -662,7 +670,7 @@ namespace com.bodurov.NdSpace
             left.AssignNext(upper);
             upper.AssignNext(right);
 
-            toExtendUp.Point.Tail = upper;
+            toExtendUp.DimPoint.TailLink = upper;
 
             nextUpExtension = upper.GetSiblingExtensionCandidate();
 
@@ -692,7 +700,7 @@ namespace com.bodurov.NdSpace
                 }
                 if (left != null)
                 {
-                    foreach (var sp in left.Points)
+                    foreach (var sp in left.SpaPoints)
                     {
                         if (sp.IsLocatedAt(dimensionPositions))
                         {
@@ -705,24 +713,24 @@ namespace com.bodurov.NdSpace
         }
         bool ISpaceManager.TryFindDimensionPoint<T>(Dimension<T> dimension, float position, out DimensionPoint<T> left, out DimensionPoint<T> right)
         {
-            if (dimension.Head == null)
+            if (dimension.HeadDimPoint == null)
             {
                 left = null;
                 right = null;
                 return false;
             }
 
-            var candidateLeft = dimension.Head.Tail;
-            var candidateRight = dimension.Tail.Tail;
-            var leftLimit = candidateLeft.Point.Position;
-            var rightLimit = candidateRight.Point.Position;
+            var candidateLeft = dimension.HeadDimPoint.TailLink;
+            var candidateRight = dimension.TailDimPoint.TailLink;
+            var leftLimit = candidateLeft.DimPoint.Position;
+            var rightLimit = candidateRight.DimPoint.Position;
             if (position > (leftLimit - dimension.Epsillon) && position < (rightLimit + dimension.Epsillon))
             {
                 while (true)
                 {
                     while (candidateLeft.Next != null && candidateLeft.Next != candidateRight)
                     {
-                        if ((candidateLeft.Next.Point.Position - dimension.Epsillon) < position)
+                        if ((candidateLeft.Next.DimPoint.Position - dimension.Epsillon) < position)
                         {
                             candidateLeft = candidateLeft.Next;
                         }
@@ -741,31 +749,31 @@ namespace com.bodurov.NdSpace
                     }
 
 
-                    if (dimension.Eq(position, candidateLeft.Point.Position))
+                    if (dimension.Eq(position, candidateLeft.DimPoint.Position))
                     {
-                        left = right = candidateLeft.Point;
+                        left = right = candidateLeft.DimPoint;
                         return true;
                     }
-                    if (dimension.Eq(position, candidateRight.Point.Position))
+                    if (dimension.Eq(position, candidateRight.DimPoint.Position))
                     {
-                        left = right = candidateRight.Point;
+                        left = right = candidateRight.DimPoint;
                         return true;
                     }
                     break;
                 }
-                left = candidateLeft.Point;
-                right = candidateRight.Point;
+                left = candidateLeft.DimPoint;
+                right = candidateRight.DimPoint;
                 return false;
             }
             else if (position < leftLimit)
             {
                 left = null;
-                right = candidateLeft.Point;
+                right = candidateLeft.DimPoint;
                 return false;
             }
             else if (position > rightLimit)
             {
-                left = candidateRight.Point;
+                left = candidateRight.DimPoint;
                 right = null;
                 return false;
             }
@@ -776,6 +784,15 @@ namespace com.bodurov.NdSpace
             return false;
         }
 
+        bool ISpaceManager.Reposition<T>(SpacePoint<T> sp, float x, float y, float z)
+        {
+            MustBe.Equal(sp.Dimensions.Length, 3, () => "space.Dimensions.Length AND x,y,z");
+            byte r = 0;
+            if (_spaceManager.Reposition(sp.Dimensions[0].Dimension, sp, x)) ++r;
+            if (_spaceManager.Reposition(sp.Dimensions[1].Dimension, sp, y)) ++r;
+            if (_spaceManager.Reposition(sp.Dimensions[2].Dimension, sp, z)) ++r;
+            return r > 0;
+        }
         bool ISpaceManager.Reposition<T>(SpacePoint<T> sp, params float[] dimensionPositions)
         {
             MustBe.Equal(sp.Dimensions.Length, dimensionPositions.Length, () => "space.Dimensions.Length AND dimensionPositions.Length");
@@ -800,7 +817,7 @@ namespace com.bodurov.NdSpace
             {
                 if (point.NumberPoints > 1)
                 {
-                    if (point.RemovePoint(sp))
+                    if (RemovePointFromDimensions(sp, dimension.Index))
                     {
                         sp.Dimensions[dimension.Index] = null;
                         _spaceManager.AddPoint(dimension, sp, next);
@@ -808,14 +825,14 @@ namespace com.bodurov.NdSpace
                 }
                 else
                 {
-                    var link = point.Head;
-                    if (link.Prev == null || link.Prev.Point.Position < next)
+                    var link = point.HeadLink;
+                    if (link.Prev == null || link.Prev.DimPoint.Position < next)
                     {
                         point.Position = next;
                     }
                     else
                     {
-                        if (_spaceManager.RemovePoint(sp))
+                        if (RemovePointFromDimensions(sp, dimension.Index))
                         {
                             sp.Dimensions[dimension.Index] = null;
                             _spaceManager.AddPoint(dimension, sp, next);
@@ -830,7 +847,7 @@ namespace com.bodurov.NdSpace
 
                 if (point.NumberPoints > 1)
                 {
-                    if (point.RemovePoint(sp))
+                    if (RemovePointFromDimensions(sp, dimension.Index))
                     {
                         sp.Dimensions[dimension.Index] = null;
                         _spaceManager.AddPoint(dimension, sp, next);
@@ -838,14 +855,14 @@ namespace com.bodurov.NdSpace
                 }
                 else
                 {
-                    var link = point.Head;
-                    if (link.Next == null || link.Next.Point.Position > next)
+                    var link = point.HeadLink;
+                    if (link.Next == null || link.Next.DimPoint.Position > next)
                     {
                         point.Position = next;
                     }
                     else
                     {
-                        if (_spaceManager.RemovePoint(sp))
+                        if (RemovePointFromDimensions(sp, dimension.Index))
                         {
                             sp.Dimensions[dimension.Index] = null;
                             _spaceManager.AddPoint(dimension, sp, next);
@@ -853,7 +870,6 @@ namespace com.bodurov.NdSpace
                     }
                 }
             }
-
 
             return true;
         }
@@ -868,7 +884,7 @@ namespace com.bodurov.NdSpace
 
         private void ClearDimension<T>(Dimension<T> dimension)
         {
-            dimension.Head = dimension.Tail = null;
+            dimension.HeadDimPoint = dimension.TailDimPoint = null;
             dimension.Count = 0;
         }
 
@@ -909,13 +925,13 @@ namespace com.bodurov.NdSpace
                     }
                 }
                 curr = new DimensionPoint<T>(dimension) {Position = position};
-                curr.Head = new DimensionLink<T>(0, curr);
-                curr.Tail = curr.Head;
+                curr.HeadLink = new DimensionLink<T>(0, curr);
+                curr.TailLink = curr.HeadLink;
                 curr.AddPoint(sp);
 
                 if (prev != null)
                 {
-                    prev.Head.AssignNext(curr.Head);
+                    prev.HeadLink.AssignNext(curr.HeadLink);
                 }
                 else
                 {
@@ -924,12 +940,12 @@ namespace com.bodurov.NdSpace
                 prev = curr;
             }
 
-            dimension.Head = head;
-            dimension.Tail = curr;
+            dimension.HeadDimPoint = head;
+            dimension.TailDimPoint = curr;
             dimension.Count += points.Count;
 
 // ReSharper disable PossibleNullReferenceException
-            DimensionLink<T> link = dimension.Head.Head;
+            DimensionLink<T> link = dimension.HeadDimPoint.HeadLink;
 // ReSharper restore PossibleNullReferenceException
 
             // if this is the top level
@@ -945,7 +961,7 @@ namespace com.bodurov.NdSpace
                     firstUpper = upper;
                 }
                 link.AssignUpper(upper);
-                link.Point.Tail = upper;
+                link.DimPoint.TailLink = upper;
                 if (prevUpper != null)
                 {
                     prevUpper.AssignNext(upper);
