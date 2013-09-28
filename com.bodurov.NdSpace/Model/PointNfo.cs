@@ -1,9 +1,9 @@
 ﻿namespace com.bodurov.NdSpace.Model
 {
-    public class PointAndDistance<T>
+    public class PointNfo<T>
     {
-        public PointAndDistance(){}
-        public PointAndDistance(SpacePoint<T> point, float distance)
+        public PointNfo(){}
+        public PointNfo(SpacePoint<T> point, float distance)
         {
             Point = point;
             Distance = distance;

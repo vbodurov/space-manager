@@ -10,7 +10,7 @@ namespace com.bodurov.NdSpace.Model
             Index = index;
             Space = space;
             Count = 0;
-            Epsillon = space.Config.DefaultEpsilon;
+            Epsillon = space == null ? 0.1f : space.Config.DefaultEpsilon;
         }
 
         public DimensionPoint<T> HeadDimPoint { get; internal set; }

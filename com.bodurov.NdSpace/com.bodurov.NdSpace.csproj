@@ -48,7 +48,7 @@
     <Compile Include="Model\Dimension.cs" />
     <Compile Include="Model\DimensionLink.cs" />
     <Compile Include="Model\DimensionPoint.cs" />
-    <Compile Include="Model\PointAndDistance.cs" />
+    <Compile Include="Model\PointNfo.cs" />
     <Compile Include="Model\Space.cs" />
     <Compile Include="Model\SpacePoint.cs" />
     <Compile Include="Model\SpacePointSource.cs" />

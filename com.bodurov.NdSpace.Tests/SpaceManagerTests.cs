@@ -2,6 +2,7 @@
 using com.bodurov.NdSpace;
 using com.bodurov.NdSpace.Interface;
 using com.bodurov.NdSpace.Model;
+using YouVisio.Unity3D.AI.Tests.SampleExtensions;
 
 namespace YouVisio.Unity3D.AI.Tests
 {

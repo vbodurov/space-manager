@@ -11,30 +11,12 @@ namespace com.bodurov.NdSpace
     {
         private readonly ISpaceManager _spaceManager;
 
-
         internal SpaceManager()
         {
             _spaceManager = this;
         }
 
-        SpacePoint<T> ISpaceManager.FindNearest<T>(SpacePoint<T> center, float within)
-        {
-            var pan = new PointAndDistance<T>(null, Single.MaxValue);
-            return _spaceManager.AggregateNear(center, pan, (aggr, curr, cen, dis) =>
-                    {
-                        if (dis < aggr.Distance)
-                        {
-                            aggr.Point = curr;
-                            aggr.Distance = dis;
-                        }
-                        return aggr;
-                    }, within).Point;
-        }
-        IEnumerable<SpacePoint<T>> ISpaceManager.FindAllNear<T>(SpacePoint<T> center, float within)
-        {
-            return _spaceManager.FindAllNearWhere(center, (curr, cen, dis) => true, within);
-        }
-        TAccumulate ISpaceManager.AggregateNear<TSource, TAccumulate>(SpacePoint<TSource> center, TAccumulate seed, Func<TAccumulate, SpacePoint<TSource>, SpacePoint<TSource>, float, TAccumulate> func, float within)
+        TAccumulate ISpaceManager.AggregateWithin<TSource, TAccumulate>(SpacePoint<TSource> center, TAccumulate seed, float within, Func<TAccumulate, SpacePoint<TSource>, SpacePoint<TSource>, float, TAccumulate> func)
         {
             const int dimension = 0;
             var centerDimPoint = center.Dimensions[dimension];
@@ -123,11 +105,7 @@ namespace com.bodurov.NdSpace
                 prev = prev.Prev;
             }
         }
-        IEnumerable<PointAndDistance<T>> ISpaceManager.FindAllNearWithDistance<T>(SpacePoint<T> center, float within)
-        {
-            return _spaceManager.FindAllNearWhereWithDistance(center, (curr, cen, dis) => true, within);
-        }
-        IEnumerable<PointAndDistance<T>> ISpaceManager.FindAllNearWhereWithDistance<T>(SpacePoint<T> center, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where, float within)
+        IEnumerable<PointNfo<T>> ISpaceManager.FindAllNearWhereWithDistance<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
         {
             const int dimension = 0;
             var centerDimPoint = center.Dimensions[dimension];
@@ -139,7 +117,7 @@ namespace com.bodurov.NdSpace
                     var dictance = sp.DistanceTo(center);
                     if (dictance <= within && where(sp, center, dictance))
                     {
-                        yield return new PointAndDistance<T>(sp, dictance);
+                        yield return new PointNfo<T>(sp, dictance);
                     }
                 }
             }
@@ -152,7 +130,7 @@ namespace com.bodurov.NdSpace
                     var dictance = nextSpaPoint.DistanceTo(center);
                     if (dictance <= within && where(nextSpaPoint, center, dictance))
                     {
-                        yield return new PointAndDistance<T>(nextSpaPoint, dictance);
+                        yield return new PointNfo<T>(nextSpaPoint, dictance);
                     }
                 }
                 next = next.Next;
@@ -165,7 +143,7 @@ namespace com.bodurov.NdSpace
                     var dictance = prevSpaPoint.DistanceTo(center);
                     if (dictance <= within && where(prevSpaPoint, center, dictance))
                     {
-                        yield return new PointAndDistance<T>(prevSpaPoint, dictance);
+                        yield return new PointNfo<T>(prevSpaPoint, dictance);
                     }
                 }
                 prev = prev.Prev;
