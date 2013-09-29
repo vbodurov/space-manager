@@ -61,7 +61,7 @@ namespace com.bodurov.NdSpace
             }
             return seed;
         }
-        IEnumerable<SpacePoint<T>> ISpaceManager.FindAllNearWhere<T>(SpacePoint<T> center, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where, float within)
+        IEnumerable<SpacePoint<T>> ISpaceManager.FindAllNearWhere<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
         {
             const int dimension = 0;
             var centerDimPoint = center.Dimensions[dimension];

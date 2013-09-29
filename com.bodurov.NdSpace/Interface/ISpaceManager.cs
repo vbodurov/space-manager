@@ -24,7 +24,7 @@ namespace com.bodurov.NdSpace.Interface
         /// <param name="where">(current, center, distanceBetween)</param>
         /// <param name="within">include points within</param>
         /// <returns>to include or not</returns>
-        IEnumerable<SpacePoint<T>> FindAllNearWhere<T>(SpacePoint<T> center, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where, float within);
+        IEnumerable<SpacePoint<T>> FindAllNearWhere<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where);
         /// <typeparam name="TSource">the type of space point value</typeparam>
         /// <typeparam name="TAccumulate">the type of the accumulate</typeparam>
         /// <param name="center">center point</param>
