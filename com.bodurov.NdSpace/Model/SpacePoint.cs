@@ -14,6 +14,12 @@ namespace com.bodurov.NdSpace.Model
         public Space<T> Space { get; private set; }
         public DimensionPoint<T>[] Dimensions { get; private set; }
         public T Value { get; set; }
+        public bool IsFastMover { get; set; }
+        public SpacePoint<T> SetFastMover()
+        {
+            IsFastMover = true;
+            return this;
+        } 
 
         public float DistanceTo(SpacePoint<T> otherPoint)
         {

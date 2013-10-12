@@ -181,7 +181,7 @@ namespace com.bodurov.NdSpace.Visualizations
                         {
                             Width = containerPad * 5,
                             Height = containerPad * 2,
-                            Fill = Brushes.LightSkyBlue,
+                            Fill = sp.IsFastMover ? Brushes.LawnGreen : Brushes.LightSkyBlue,
                             Stroke = Brushes.Black,
                             StrokeThickness = 0.5,
                             Tag = sp

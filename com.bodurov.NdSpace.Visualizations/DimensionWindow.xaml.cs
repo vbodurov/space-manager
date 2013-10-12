@@ -17,7 +17,7 @@ namespace com.bodurov.NdSpace.Visualizations
     public class TestConfig : ISpaceConfig
     {
         int ISpaceConfig.NumDimensions { get { return 1; } }
-        double ISpaceConfig.DefaultEpsilon { get { return 5; } }
+        double ISpaceConfig.DefaultEpsilon { get { return 10; } }
     }
 
 
@@ -58,9 +58,13 @@ namespace com.bodurov.NdSpace.Visualizations
         private static List<SpacePointSource<int>> GetTestPoints(Space<int> space)
         {
             var list = new List<SpacePointSource<int>>();
+            var j = 0;
             for (var x = 50; x <= 950; x += 100)
             {
-                list.Add(new SpacePointSource<int>(space, x, x));
+                var sps = new SpacePointSource<int>(space, x, x);
+                ++j;
+                if (j == 3 || j == 7) sps.IsFastMover = true;
+                list.Add(sps);
             }
             return list;
         }

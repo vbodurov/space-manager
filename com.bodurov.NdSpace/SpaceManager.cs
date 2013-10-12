@@ -486,11 +486,15 @@ namespace com.bodurov.NdSpace
             left.HeadLink.AssignNext(newLink);
             newLink.AssignNext(right.HeadLink);
 
-            _spaceManager.TryAddLevel(dimension);
-            var toExtendUp = newLink.GetSiblingExtensionCandidate();
-            while (_spaceManager.TryExtendUp(toExtendUp, out toExtendUp))
+            // for fast movers do not normalize the tree
+            if (!sp.IsFastMover)
             {
                 _spaceManager.TryAddLevel(dimension);
+                var toExtendUp = newLink.GetSiblingExtensionCandidate();
+                while (_spaceManager.TryExtendUp(toExtendUp, out toExtendUp))
+                {
+                    _spaceManager.TryAddLevel(dimension);
+                }
             }
             dimension.Count++;
             return true;
