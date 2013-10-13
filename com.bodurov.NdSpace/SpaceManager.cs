@@ -15,17 +15,21 @@ namespace com.bodurov.NdSpace
         {
             _spaceManager = this;
         }
-
         TAccumulate ISpaceManager.AggregateWithin<TSource, TAccumulate>(SpacePoint<TSource> center, TAccumulate seed, float within, Func<TAccumulate, SpacePoint<TSource>, SpacePoint<TSource>, float, TAccumulate> func)
         {
-            const int dimension = 0;
-            var centerDimPoint = center.Dimensions[dimension];
+            return ((ISpaceManager) this).AggregateWithin(center, seed, within, null, func);
+        }
+        TAccumulate ISpaceManager.AggregateWithin<TSource, TAccumulate>(SpacePoint<TSource> center, TAccumulate seed, float within, IDimensionSelector dimSelector, Func<TAccumulate, SpacePoint<TSource>, SpacePoint<TSource>, float, TAccumulate> func)
+        {
+            if (dimSelector == null) dimSelector = DimensionSelector.Default;
+
+            var centerDimPoint = center.Dimensions[dimSelector.MainDimensionIndex];
             var centerLink = centerDimPoint.HeadLink;
             if (centerDimPoint.NumberPoints > 1)
             {
                 foreach (var sp in centerDimPoint.SpaPoints.Where(p => p.ID != center.ID))
                 {
-                    var dictance = sp.DistanceTo(center);
+                    var dictance = sp.DistanceTo(center, dimSelector);
                     if (dictance <= within)
                     {
                         seed = func(seed, sp, center, dictance);
@@ -38,7 +42,7 @@ namespace com.bodurov.NdSpace
             {
                 foreach(var nextSpaPoint in next.DimPoint.SpaPoints)
                 {
-                    var dictance = nextSpaPoint.DistanceTo(center);
+                    var dictance = nextSpaPoint.DistanceTo(center, dimSelector);
                     if (dictance <= within)
                     {
                         seed = func(seed, nextSpaPoint, center, dictance);
@@ -51,7 +55,7 @@ namespace com.bodurov.NdSpace
             {
                 foreach(var prevSpaPoint in prev.DimPoint.SpaPoints)
                 {
-                    var dictance = prevSpaPoint.DistanceTo(center);
+                    var dictance = prevSpaPoint.DistanceTo(center, dimSelector);
                     if (dictance <= within)
                     {
                         seed = func(seed, prevSpaPoint, center, dictance);
@@ -61,63 +65,26 @@ namespace com.bodurov.NdSpace
             }
             return seed;
         }
-        IEnumerable<SpacePoint<T>> ISpaceManager.FindAllNearWhere<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
+        List<SpacePoint<T>> ISpaceManager.FindAllNearWhere<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
         {
-            const int dimension = 0;
-            var centerDimPoint = center.Dimensions[dimension];
-            var centerLink = centerDimPoint.HeadLink;
-            if (centerDimPoint.NumberPoints > 1)
-            {
-                foreach (var sp in centerDimPoint.SpaPoints.Where(p => p.ID != center.ID))
-                {
-                    var dictance = sp.DistanceTo(center);
-                    if (dictance <= within && where(sp, center, dictance))
-                    {
-                        yield return sp;
-                    }
-                }
-            }
-            var centerPos = centerDimPoint.Position;
-            var next = centerLink.Next;
-            while (next != null && (next.Position - centerPos).Abs() <= within)
-            {
-                foreach (var nextSpaPoint in next.DimPoint.SpaPoints)
-                {
-                    var dictance = nextSpaPoint.DistanceTo(center);
-                    if (dictance <= within && where(nextSpaPoint, center, dictance))
-                    {
-                        yield return nextSpaPoint;
-                    }
-                }
-                next = next.Next;
-            }
-            var prev = centerLink.Prev;
-            while (prev != null && (prev.Position - centerPos).Abs() <= within)
-            {
-                foreach (var prevSpaPoint in prev.DimPoint.SpaPoints)
-                {
-                    var dictance = prevSpaPoint.DistanceTo(center);
-                    if (dictance <= within && where(prevSpaPoint, center, dictance))
-                    {
-                        yield return prevSpaPoint;
-                    }
-                }
-                prev = prev.Prev;
-            }
+            return ((ISpaceManager) this).FindAllNearWhere<T>(center, within, null, where);
         }
-        IEnumerable<PointNfo<T>> ISpaceManager.FindAllNearWhereWithDistance<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
+        List<SpacePoint<T>> ISpaceManager.FindAllNearWhere<T>(SpacePoint<T> center, float within, IDimensionSelector dimSelector, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
         {
-            const int dimension = 0;
-            var centerDimPoint = center.Dimensions[dimension];
+            if (dimSelector == null) dimSelector = DimensionSelector.Default;
+
+            var list = new List<SpacePoint<T>>();
+
+            var centerDimPoint = center.Dimensions[dimSelector.MainDimensionIndex];
             var centerLink = centerDimPoint.HeadLink;
             if (centerDimPoint.NumberPoints > 1)
             {
                 foreach (var sp in centerDimPoint.SpaPoints.Where(p => p.ID != center.ID))
                 {
-                    var dictance = sp.DistanceTo(center);
+                    var dictance = sp.DistanceTo(center, dimSelector);
                     if (dictance <= within && where(sp, center, dictance))
                     {
-                        yield return new PointNfo<T>(sp, dictance);
+                        list.Add(sp);
                     }
                 }
             }
@@ -127,10 +94,10 @@ namespace com.bodurov.NdSpace
             {
                 foreach (var nextSpaPoint in next.DimPoint.SpaPoints)
                 {
-                    var dictance = nextSpaPoint.DistanceTo(center);
+                    var dictance = nextSpaPoint.DistanceTo(center, dimSelector);
                     if (dictance <= within && where(nextSpaPoint, center, dictance))
                     {
-                        yield return new PointNfo<T>(nextSpaPoint, dictance);
+                        list.Add(nextSpaPoint);
                     }
                 }
                 next = next.Next;
@@ -140,14 +107,67 @@ namespace com.bodurov.NdSpace
             {
                 foreach (var prevSpaPoint in prev.DimPoint.SpaPoints)
                 {
-                    var dictance = prevSpaPoint.DistanceTo(center);
+                    var dictance = prevSpaPoint.DistanceTo(center, dimSelector);
                     if (dictance <= within && where(prevSpaPoint, center, dictance))
                     {
-                        yield return new PointNfo<T>(prevSpaPoint, dictance);
+                        list.Add(prevSpaPoint);
                     }
                 }
                 prev = prev.Prev;
             }
+            return list;
+        }
+        List<PointNfo<T>> ISpaceManager.FindAllNearWhereWithDistance<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
+        {
+            return ((ISpaceManager)this).FindAllNearWhereWithDistance(center, within, null, where);
+        }
+        List<PointNfo<T>> ISpaceManager.FindAllNearWhereWithDistance<T>(SpacePoint<T> center, float within, IDimensionSelector dimSelector, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
+        {
+            if (dimSelector == null) dimSelector = DimensionSelector.Default;
+
+            var list = new List<PointNfo<T>>();
+
+            var centerDimPoint = center.Dimensions[dimSelector.MainDimensionIndex];
+            var centerLink = centerDimPoint.HeadLink;
+            if (centerDimPoint.NumberPoints > 1)
+            {
+                foreach (var sp in centerDimPoint.SpaPoints.Where(p => p.ID != center.ID))
+                {
+                    var distance = sp.DistanceTo(center, dimSelector);
+                    if (distance <= within && where(sp, center, distance))
+                    {
+                        list.Add(new PointNfo<T>(sp, distance));
+                    }
+                }
+            }
+            var centerPos = centerDimPoint.Position;
+            var next = centerLink.Next;
+            while (next != null && (next.Position - centerPos).Abs() <= within)
+            {
+                foreach (var nextSpaPoint in next.DimPoint.SpaPoints)
+                {
+                    var distance = nextSpaPoint.DistanceTo(center, dimSelector);
+                    if (distance <= within && where(nextSpaPoint, center, distance))
+                    {
+                        list.Add(new PointNfo<T>(nextSpaPoint, distance));
+                    }
+                }
+                next = next.Next;
+            }
+            var prev = centerLink.Prev;
+            while (prev != null && (prev.Position - centerPos).Abs() <= within)
+            {
+                foreach (var prevSpaPoint in prev.DimPoint.SpaPoints)
+                {
+                    var distance = prevSpaPoint.DistanceTo(center, dimSelector);
+                    if (distance <= within && where(prevSpaPoint, center, distance))
+                    {
+                        list.Add(new PointNfo<T>(prevSpaPoint, distance));
+                    }
+                }
+                prev = prev.Prev;
+            }
+            return list;
         }
 
 

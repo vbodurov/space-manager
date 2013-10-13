@@ -1,4 +1,5 @@
 ﻿using System;
+using com.bodurov.NdSpace.Interface;
 
 namespace com.bodurov.NdSpace.Model
 {
@@ -19,13 +20,21 @@ namespace com.bodurov.NdSpace.Model
         {
             IsFastMover = true;
             return this;
-        } 
+        }
 
         public float DistanceTo(SpacePoint<T> otherPoint)
         {
+            return DistanceTo(otherPoint, null);
+        }
+        public float DistanceTo(SpacePoint<T> otherPoint, IDimensionSelector dimSelector)
+        {
+            var hasSelector = dimSelector != null;
+
             var sum = 0f;
             for (var d = 0; d < Dimensions.Length; ++d)
             {
+                if (hasSelector && !dimSelector.IncludesDimension(d)) continue;
+
                 var valOther = otherPoint.Dimensions[d].Position;
                 var valCurrD = Dimensions[d].Position;
 

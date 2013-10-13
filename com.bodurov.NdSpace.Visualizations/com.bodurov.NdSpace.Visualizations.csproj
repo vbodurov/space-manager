@@ -109,7 +109,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="com.bodurov.NdSpace.Visualizations_TemporaryKey.pfx" />
     <None Include="files\schema.fla" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
