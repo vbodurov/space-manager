@@ -17,7 +17,7 @@ namespace com.bodurov.NdSpace
         }
         TAccumulate ISpaceManager.AggregateWithin<TSource, TAccumulate>(SpacePoint<TSource> center, TAccumulate seed, float within, Func<TAccumulate, SpacePoint<TSource>, SpacePoint<TSource>, float, TAccumulate> func)
         {
-            return ((ISpaceManager) this).AggregateWithin(center, seed, within, null, func);
+            return ((ISpaceManager)this).AggregateWithin(center, seed, within, null, func);
         }
         TAccumulate ISpaceManager.AggregateWithin<TSource, TAccumulate>(SpacePoint<TSource> center, TAccumulate seed, float within, IDimensionSelector dimSelector, Func<TAccumulate, SpacePoint<TSource>, SpacePoint<TSource>, float, TAccumulate> func)
         {
@@ -40,7 +40,7 @@ namespace com.bodurov.NdSpace
             var next = centerLink.Next;
             while (next != null && (next.Position - centerPos).Abs() <= within)
             {
-                foreach(var nextSpaPoint in next.DimPoint.SpaPoints)
+                foreach (var nextSpaPoint in next.DimPoint.SpaPoints)
                 {
                     var dictance = nextSpaPoint.DistanceTo(center, dimSelector);
                     if (dictance <= within)
@@ -53,7 +53,7 @@ namespace com.bodurov.NdSpace
             var prev = centerLink.Prev;
             while (prev != null && (prev.Position - centerPos).Abs() <= within)
             {
-                foreach(var prevSpaPoint in prev.DimPoint.SpaPoints)
+                foreach (var prevSpaPoint in prev.DimPoint.SpaPoints)
                 {
                     var dictance = prevSpaPoint.DistanceTo(center, dimSelector);
                     if (dictance <= within)
@@ -67,7 +67,7 @@ namespace com.bodurov.NdSpace
         }
         List<SpacePoint<T>> ISpaceManager.FindAllNearWhere<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
         {
-            return ((ISpaceManager) this).FindAllNearWhere<T>(center, within, null, where);
+            return ((ISpaceManager)this).FindAllNearWhere<T>(center, within, null, where);
         }
         List<SpacePoint<T>> ISpaceManager.FindAllNearWhere<T>(SpacePoint<T> center, float within, IDimensionSelector dimSelector, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
         {
@@ -116,6 +116,57 @@ namespace com.bodurov.NdSpace
                 prev = prev.Prev;
             }
             return list;
+        }
+        bool ISpaceManager.Any<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
+        {
+            return ((ISpaceManager)this).Any(center, within, null, where);
+        }
+        bool ISpaceManager.Any<T>(SpacePoint<T> center, float within, IDimensionSelector dimSelector, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
+        {
+            if (dimSelector == null) dimSelector = DimensionSelector.Default;
+
+            var centerDimPoint = center.Dimensions[dimSelector.MainDimensionIndex];
+            var centerLink = centerDimPoint.HeadLink;
+            if (centerDimPoint.NumberPoints > 1)
+            {
+
+                foreach (var sp in centerDimPoint.SpaPoints.Where(p => p.ID != center.ID))
+                {
+                    var distance = sp.DistanceTo(center, dimSelector);
+                    if (distance <= within && where(sp, center, distance))
+                    {
+                        return true;
+                    }
+                }
+            }
+            var centerPos = centerDimPoint.Position;
+            var next = centerLink.Next;
+            while (next != null && (next.Position - centerPos).Abs() <= within)
+            {
+                foreach (var nextSpaPoint in next.DimPoint.SpaPoints)
+                {
+                    var distance = nextSpaPoint.DistanceTo(center, dimSelector);
+                    if (distance <= within && where(nextSpaPoint, center, distance))
+                    {
+                        return true;
+                    }
+                }
+                next = next.Next;
+            }
+            var prev = centerLink.Prev;
+            while (prev != null && (prev.Position - centerPos).Abs() <= within)
+            {
+                foreach (var prevSpaPoint in prev.DimPoint.SpaPoints)
+                {
+                    var distance = prevSpaPoint.DistanceTo(center, dimSelector);
+                    if (distance <= within && where(prevSpaPoint, center, distance))
+                    {
+                        return true;
+                    }
+                }
+                prev = prev.Prev;
+            }
+            return false;
         }
         List<PointNfo<T>> ISpaceManager.FindAllNearWhereWithDistance<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where)
         {
@@ -272,7 +323,7 @@ namespace com.bodurov.NdSpace
             TryRemoveLevelInternal(dimension);
         }
 
-        
+
 
         private static void RemoveTail<T>(Dimension<T> dimension)
         {
@@ -302,7 +353,7 @@ namespace com.bodurov.NdSpace
             TryRemoveLevelInternal(dPoint.Dimension);
         }
 
-        
+
         private static bool RemoveOrMoveColumn<T>(DimensionPoint<T> dPoint)
         {
             if (dPoint == null || dPoint.HeadLink == null) return false;
@@ -311,7 +362,7 @@ namespace com.bodurov.NdSpace
             var head = dPoint.HeadLink;
             var tail = dPoint.TailLink;
 
-            
+
             // try move right to direct neighbour that has only 1 level
             if (HasBottomLevelNeighbourToTheRight(head))
             {
@@ -361,7 +412,7 @@ namespace com.bodurov.NdSpace
             {
                 DeleteColumn(head);
             }
-            
+
             return true;
         }
 
@@ -389,7 +440,7 @@ namespace com.bodurov.NdSpace
 
         private static bool HasTopLevelNeighbourToTheRight<T>(DimensionLink<T> tail)
         {
-            return tail.Level > 1 && 
+            return tail.Level > 1 &&
                    tail.Next != null &&
                    tail.Next.Lower.Prev != tail.Lower &&
                    tail.Next.Lower.Prev.Prev != tail.Lower;
@@ -433,8 +484,8 @@ namespace com.bodurov.NdSpace
             }
         }
 
-        
-        
+
+
 
         SpacePoint<T> ISpaceManager.AddPoint<T>(Space<T> space, T data, params float[] dimensionPositions)
         {
@@ -461,7 +512,7 @@ namespace com.bodurov.NdSpace
                 return false;
             }
 
-            MustBe.Null(sp.Dimensions[dimension.Index], () => "space point already has assigned the dimension with index="+dimension.Index);
+            MustBe.Null(sp.Dimensions[dimension.Index], () => "space point already has assigned the dimension with index=" + dimension.Index);
 
             if (dimension.HeadDimPoint == null)
             {
@@ -522,7 +573,7 @@ namespace com.bodurov.NdSpace
 
         private void AppendNewTail<T>(Dimension<T> dimension, SpacePoint<T> sp, float position)
         {
-            var newTail = new DimensionPoint<T>(dimension) {Position = position};
+            var newTail = new DimensionPoint<T>(dimension) { Position = position };
             newTail.AddPoint(sp);
             newTail.HeadLink = new DimensionLink<T>(0, newTail);
 
@@ -548,7 +599,7 @@ namespace com.bodurov.NdSpace
 
         private void AppendNewHead<T>(Dimension<T> dimension, SpacePoint<T> sp, float position)
         {
-            var newHead = new DimensionPoint<T>(dimension) {Position = position};
+            var newHead = new DimensionPoint<T>(dimension) { Position = position };
             newHead.AddPoint(sp);
             newHead.HeadLink = new DimensionLink<T>(0, newHead);
 
@@ -578,7 +629,7 @@ namespace com.bodurov.NdSpace
             var topLeft = dimension.HeadDimPoint.TailLink;
 
             if (topLeft.CountConnectionsRight() == 0) return false;
-            
+
             var left = new DimensionLink<T>((byte)(topLeft.Level + 1));
             topLeft.AssignUpper(left);
 
@@ -666,7 +717,7 @@ namespace com.bodurov.NdSpace
             var left = leftCorner.Upper;
             var right = rightCorner.Upper;
 
-            var upper = new DimensionLink<T>((byte) (toExtendUp.Level + 1));
+            var upper = new DimensionLink<T>((byte)(toExtendUp.Level + 1));
 
             toExtendUp.AssignUpper(upper);
             left.AssignNext(upper);
@@ -685,7 +736,84 @@ namespace com.bodurov.NdSpace
             point = set.FirstOrDefault();
             return point != null;
         }
-        
+
+        IEnumerable<SpacePoint<T>> ISpaceManager.FindSpacePointsWithin<T>(Space<T> space, float within, IDimensionSelector dimSelector, params float[] dimensionPositions)
+        {
+            MustBe.Equal(space.Dimensions.Length, dimensionPositions.Length, () => "space.Dimensions.Length AND dimensionPositions.Length");
+
+            var spacePoints = new HashSet<SpacePoint<T>>();
+            var tempDimPoints = new HashSet<DimensionPoint<T>>();
+            for (var d = 0; d < space.Dimensions.Length; ++d)
+            {
+                if (dimSelector != null && !dimSelector.IncludesDimension(d))
+                    continue;
+
+                DimensionPoint<T> left;
+                DimensionPoint<T> right;
+                var dCenter = dimensionPositions[d];
+                _spaceManager.TryFindDimensionPoint(space.Dimensions[d], dCenter, out left, out right);
+                var curr = left;
+                if (curr != null && !tempDimPoints.Contains(curr))
+                {
+                    foreach (var sp in EnumerateSpacePoints(curr, spacePoints, tempDimPoints, within, dimSelector, dimensionPositions))
+                    {
+                        yield return sp;
+                    }
+                    var prev = curr.HeadLink.Prev;
+                    while (prev != null && !tempDimPoints.Contains(prev.DimPoint) && (prev.Position - dCenter).Abs() <= within)
+                    {
+                        foreach (var sp in EnumerateSpacePoints(prev.DimPoint, spacePoints, tempDimPoints, within, dimSelector, dimensionPositions))
+                        {
+                            yield return sp;
+                        }
+                    }
+                }
+                curr = right;
+                if (curr != null && !tempDimPoints.Contains(curr))
+                {
+                    foreach (var sp in EnumerateSpacePoints(curr, spacePoints, tempDimPoints, within, dimSelector, dimensionPositions))
+                    {
+                        yield return sp;
+                    }
+                    var next = curr.HeadLink.Next;
+                    while (next != null && !tempDimPoints.Contains(next.DimPoint) && (next.Position - dCenter).Abs() <= within)
+                    {
+                        foreach (var sp in EnumerateSpacePoints(next.DimPoint, spacePoints, tempDimPoints, within, dimSelector, dimensionPositions))
+                        {
+                            yield return sp;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<SpacePoint<T>> EnumerateSpacePoints<T>(
+            DimensionPoint<T> curr, HashSet<SpacePoint<T>> spacePoints,
+            HashSet<DimensionPoint<T>> tempDimPoints, float within,
+            IDimensionSelector dimSelector, params float[] dimensionPositions)
+        {
+            if (curr == null)
+            {
+                yield break;
+            }
+            tempDimPoints.Add(curr);
+
+            foreach (var sp in curr.SpaPoints)
+            {
+                if (!spacePoints.Contains(sp))
+                {
+                    var dist = sp.DistanceTo(dimensionPositions, dimSelector);
+                    if (dist <= within)
+                    {
+                        spacePoints.Add(sp);
+                        yield return sp;
+                    }
+                }
+            }
+        }
+
+
+
 
         bool ISpaceManager.TryFindSpacePoints<T>(Space<T> space, out HashSet<SpacePoint<T>> points, params float[] dimensionPositions)
         {
@@ -842,7 +970,7 @@ namespace com.bodurov.NdSpace
                     }
                 }
 
-                
+
             }
             else // THIS IS: if (prev < next)
             {
@@ -889,7 +1017,9 @@ namespace com.bodurov.NdSpace
             dimension.HeadDimPoint = dimension.TailDimPoint = null;
             dimension.Count = 0;
         }
-
+        /// <summary>
+        /// Used to populate multiple object at once
+        /// </summary>
         void ISpaceManager.PopulateSpace<T>(Space<T> space, List<SpacePointSource<T>> points)
         {
             _spaceManager.ClearSpace(space);
@@ -897,17 +1027,33 @@ namespace com.bodurov.NdSpace
             {
                 PopulateDimension(space.Dimensions[i], points);
             }
-//            for (var i = 0; i < points.Count; ++i)
-//            {
-//                points[i].InitialPositions = null;
-//            }
+            //            for (var i = 0; i < points.Count; ++i)
+            //            {
+            //                points[i].InitialPositions = null;
+            //            }
 
         }
+
+        class SpacePointComparer<T> : IComparer<SpacePointSource<T>>
+        {
+            private readonly int _index;
+
+            public SpacePointComparer(int index)
+            {
+                _index = index;
+            }
+            int IComparer<SpacePointSource<T>>.Compare(SpacePointSource<T> a, SpacePointSource<T> b)
+            {
+                return a.InitialPositions[_index].CompareTo(b.InitialPositions[_index]);
+            }
+        }
+
         private bool PopulateDimension<T>(Dimension<T> dimension, List<SpacePointSource<T>> points)
         {
-            if(points.Count == 0) return false;
+            if (points.Count == 0) return false;
 
-            points.Sort((a, b) => a.InitialPositions[dimension.Index].CompareTo(b.InitialPositions[dimension.Index]));
+            points.Sort(new SpacePointComparer<T>(dimension.Index));
+            //points.Sort((a, b) => a.InitialPositions[dimension.Index].CompareTo(b.InitialPositions[dimension.Index]));
 
             DimensionPoint<T> head = null;
             DimensionPoint<T> curr = null;
@@ -926,7 +1072,7 @@ namespace com.bodurov.NdSpace
                         continue;
                     }
                 }
-                curr = new DimensionPoint<T>(dimension) {Position = position};
+                curr = new DimensionPoint<T>(dimension) { Position = position };
                 curr.HeadLink = new DimensionLink<T>(0, curr);
                 curr.TailLink = curr.HeadLink;
                 curr.AddPoint(sp);
@@ -946,9 +1092,9 @@ namespace com.bodurov.NdSpace
             dimension.TailDimPoint = curr;
             dimension.Count += points.Count;
 
-// ReSharper disable PossibleNullReferenceException
+            // ReSharper disable PossibleNullReferenceException
             DimensionLink<T> link = dimension.HeadDimPoint.HeadLink;
-// ReSharper restore PossibleNullReferenceException
+            // ReSharper restore PossibleNullReferenceException
 
             // if this is the top level
             if (link.Next == null || link.Next.Next == null) return true;
@@ -957,7 +1103,7 @@ namespace com.bodurov.NdSpace
             DimensionLink<T> firstUpper = null;
             while (link != null)
             {
-                var upper = new DimensionLink<T>((byte) (link.Level + 1));
+                var upper = new DimensionLink<T>((byte)(link.Level + 1));
                 if (firstUpper == null)
                 {
                     firstUpper = upper;

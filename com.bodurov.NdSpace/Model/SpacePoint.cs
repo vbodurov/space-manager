@@ -44,6 +44,28 @@ namespace com.bodurov.NdSpace.Model
             }
             return (float)Math.Sqrt(sum);
         }
+        public float DistanceTo(float[] otherPoint)
+        {
+            return DistanceTo(otherPoint, null);
+        }
+        public float DistanceTo(float[] otherPoint, IDimensionSelector dimSelector)
+        {
+            var hasSelector = dimSelector != null;
+
+            var sum = 0f;
+            for (var d = 0; d < Dimensions.Length; ++d)
+            {
+                if (hasSelector && !dimSelector.IncludesDimension(d)) continue;
+
+                var valOther = otherPoint[d];
+                var valCurrD = Dimensions[d].Position;
+
+                var n = valCurrD - valOther;
+                n = n * n;
+                sum += n;
+            }
+            return (float)Math.Sqrt(sum);
+        }
 
         public bool IsLocatedAt(params float[] dimensionPositions)
         {

@@ -35,10 +35,24 @@ namespace com.bodurov.NdSpace.Interface
         /// <returns>accumulate</returns>
         TAccumulate AggregateWithin<TSource, TAccumulate>(SpacePoint<TSource> center, TAccumulate seed, float within, Func<TAccumulate, SpacePoint<TSource>, SpacePoint<TSource>, float, TAccumulate> func);
         TAccumulate AggregateWithin<TSource, TAccumulate>(SpacePoint<TSource> center, TAccumulate seed, float within, IDimensionSelector dimSelector, Func<TAccumulate, SpacePoint<TSource>, SpacePoint<TSource>, float, TAccumulate> func);
-
+        /// <typeparam name="T">the type of space point value</typeparam>
+        /// <param name="center">center point</param>
+        /// <param name="within">max distance to look for points within</param>
+        /// <param name="where">(current, center, distanceBetween)</param>
+        /// <returns>to include or not</returns>
         List<PointNfo<T>> FindAllNearWhereWithDistance<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where);
         List<PointNfo<T>> FindAllNearWhereWithDistance<T>(SpacePoint<T> center, float within, IDimensionSelector dimSelector, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where);
         bool Reposition<T>(SpacePoint<T> sp, params float[] dimensionPositions);
         bool Reposition<T>(SpacePoint<T> sp, float x, float y, float z);
+
+        /// <typeparam name="T">the type of space point value</typeparam>
+        /// <param name="center">center point</param>
+        /// <param name="within">max distance to look for points within</param>
+        /// <param name="where">(current, center, distanceBetween)</param>
+        /// <returns>found any</returns>
+        bool Any<T>(SpacePoint<T> center, float within, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where);
+        bool Any<T>(SpacePoint<T> center, float within, IDimensionSelector dimSelector, Func<SpacePoint<T>, SpacePoint<T>, float, bool> where);
+
+        IEnumerable<SpacePoint<T>> FindSpacePointsWithin<T>(Space<T> space, float within, IDimensionSelector dimSelector, params float[] dimensionPositions);
     }
 }

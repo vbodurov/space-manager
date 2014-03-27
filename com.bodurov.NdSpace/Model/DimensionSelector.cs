@@ -6,6 +6,7 @@ namespace com.bodurov.NdSpace.Model
     public class DimensionSelector : IDimensionSelector
     {
         public static readonly IDimensionSelector Default = new DimensionSelector(0, i => true);
+        public static readonly IDimensionSelector OnlyDimXZ = new DimensionSelector(0, i => i == 0 || i == 2); // ignore Y (i == 1)
 
         private readonly int _mainIndex;
         private readonly Func<int, bool> _hasDimension;

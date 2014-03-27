@@ -29,7 +29,7 @@ namespace com.bodurov.NdSpace.Model
             }
             internal set { _point = value; }
         }
-        public float Position { get { return _point == null ? Single.NaN : _point.Position; } }
+        public float Position { get { return DimPoint == null ? Single.NaN : DimPoint.Position; } }
         public byte Level { get; private set; }
 
 

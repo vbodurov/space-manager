@@ -21,6 +21,10 @@ namespace com.bodurov.NdSpace.Model
         public int Count { get; internal set; }
         public double Epsillon { get; internal set; }
 
+        public override string ToString()
+        {
+            return "Dimension("+Index+")";
+        }
 
 //        public bool Within(double c, double min, double max)
 //        {
