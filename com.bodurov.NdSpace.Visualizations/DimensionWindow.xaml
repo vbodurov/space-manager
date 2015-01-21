@@ -18,7 +18,7 @@
         
         
         <ScrollViewer  Grid.Row="1" HorizontalScrollBarVisibility="Auto"  VerticalScrollBarVisibility="Visible" HorizontalContentAlignment="Center" Background="Gainsboro">
-            <Canvas Name="TheCanvas" Background="White" Width="1000" Height="600">
+            <Canvas Name="TheCanvas" Background="White" Width="1500" Height="600">
                 <Canvas.LayoutTransform>
                     <ScaleTransform ScaleX="1" ScaleY="-1" />
                 </Canvas.LayoutTransform>
